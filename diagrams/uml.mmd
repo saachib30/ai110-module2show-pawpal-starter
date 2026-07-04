@@ -1,15 +1,56 @@
 classDiagram
-    %% Replace the placeholders below with your actual classes, attributes, methods, and relationships.
-    %% Keep this file updated so it matches your final implementation.
+    %% PawPal+ — Pet Care App UML Class Diagram
 
-    class ClassName {
-        +type attribute
-        +method() returnType
+    class Owner {
+        +String ownerId
+        +String name
+        +String email
+        +String phone
+        +List~Pet~ pets
+        +addPet(Pet pet) void
+        +removePet(String petId) void
+        +getPets() List~Pet~
+        +updateContactInfo(String email, String phone) void
     }
 
-    class AnotherClass {
-        +type attribute
-        +method() returnType
+    class Pet {
+        +String petId
+        +String name
+        +String species
+        +String breed
+        +int age
+        +double weight
+        +List~Task~ tasks
+        +addTask(Task task) void
+        +removeTask(String taskId) void
+        +getTasks() List~Task~
+        +getUpcomingTasks() List~Task~
     }
 
-    ClassName --> AnotherClass : relationship
+    class Task {
+        +String taskId
+        +String title
+        +String description
+        +String category
+        +DateTime dueDate
+        +boolean isComplete
+        +boolean isRecurring
+        +markComplete() void
+        +reschedule(DateTime newDate) void
+        +isOverdue() boolean
+    }
+
+    class PawPalSystem {
+        +String systemId
+        +List~Owner~ owners
+        +registerOwner(Owner owner) void
+        +removeOwner(String ownerId) void
+        +findOwner(String ownerId) Owner
+        +getAllPets() List~Pet~
+        +sendReminder(Task task) void
+        +generateSchedule(Owner owner) List~Task~
+    }
+
+    PawPalSystem "1" o-- "0..*" Owner : manages
+    Owner "1" *-- "0..*" Pet : owns
+    Pet "1" *-- "0..*" Task : has
