@@ -21,6 +21,7 @@ classDiagram
         +int age
         +double weight
         +List~Task~ tasks
+        +Owner owner
         +addTask(Task task) void
         +removeTask(String taskId) void
         +getTasks() List~Task~
@@ -32,9 +33,12 @@ classDiagram
         +String title
         +String description
         +String category
+        +String priority
+        +int durationMinutes
         +DateTime dueDate
         +boolean isComplete
         +boolean isRecurring
+        +Pet pet
         +markComplete() void
         +reschedule(DateTime newDate) void
         +isOverdue() boolean
@@ -48,9 +52,11 @@ classDiagram
         +findOwner(String ownerId) Owner
         +getAllPets() List~Pet~
         +sendReminder(Task task) void
-        +generateSchedule(Owner owner) List~Task~
+        +generateSchedule(Owner owner, Date day, int availableMinutes) List~Task~
     }
 
     PawPalSystem "1" o-- "0..*" Owner : manages
     Owner "1" *-- "0..*" Pet : owns
     Pet "1" *-- "0..*" Task : has
+    Task ..> Pet : belongs to
+    Pet ..> Owner : belongs to

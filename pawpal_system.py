@@ -7,7 +7,7 @@ bodies are intentionally left as stubs for you to implement.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 
 
 @dataclass
@@ -18,9 +18,14 @@ class Task:
     title: str
     description: str = ""
     category: str = ""
+    priority: str = "medium"  # "low" | "medium" | "high"
+    duration_minutes: int = 0
     due_date: datetime | None = None
     is_complete: bool = False
     is_recurring: bool = False
+    # Back-reference to the owning Pet; set by Pet.add_task(). Excluded from
+    # repr/eq to avoid recursive representation and identity coupling.
+    pet: Pet | None = field(default=None, repr=False, compare=False)
 
     def mark_complete(self) -> None:
         """Mark this task as done."""
@@ -46,9 +51,11 @@ class Pet:
     age: int = 0
     weight: float = 0.0
     tasks: list[Task] = field(default_factory=list)
+    # Back-reference to the owning Owner; set by Owner.add_pet().
+    owner: Owner | None = field(default=None, repr=False, compare=False)
 
     def add_task(self, task: Task) -> None:
-        """Attach a care task to this pet."""
+        """Attach a care task to this pet and set task.pet back to self."""
         raise NotImplementedError
 
     def remove_task(self, task_id: str) -> None:
@@ -75,7 +82,7 @@ class Owner:
     pets: list[Pet] = field(default_factory=list)
 
     def add_pet(self, pet: Pet) -> None:
-        """Register a new pet under this owner."""
+        """Register a new pet under this owner and set pet.owner back to self."""
         raise NotImplementedError
 
     def remove_pet(self, pet_id: str) -> None:
@@ -86,8 +93,10 @@ class Owner:
         """Return all pets belonging to this owner."""
         raise NotImplementedError
 
-    def update_contact_info(self, email: str, phone: str) -> None:
-        """Update the owner's contact details."""
+    def update_contact_info(
+        self, email: str | None = None, phone: str | None = None
+    ) -> None:
+        """Update the owner's contact details (only the fields provided)."""
         raise NotImplementedError
 
 
@@ -115,9 +124,16 @@ class PawPalSystem:
         raise NotImplementedError
 
     def send_reminder(self, task: Task) -> None:
-        """Notify the relevant owner about an upcoming or overdue task."""
+        """Notify the relevant owner about an upcoming or overdue task.
+
+        Resolves the owner via task.pet.owner, so the back-references must be
+        set (use Pet.add_task / Owner.add_pet when wiring objects together).
+        """
         raise NotImplementedError
 
-    def generate_schedule(self, owner: Owner) -> list[Task]:
-        """Build an ordered plan of tasks for the given owner."""
+    def generate_schedule(
+        self, owner: Owner, day: date, available_minutes: int
+    ) -> list[Task]:
+        """Build an ordered plan for `day`, choosing and ordering the owner's
+        tasks by priority/duration within the `available_minutes` budget."""
         raise NotImplementedError
