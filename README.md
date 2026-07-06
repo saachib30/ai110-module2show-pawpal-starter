@@ -12,6 +12,18 @@ A busy pet owner needs help staying consistent with pet care. They want an assis
 
 Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
 
+## ✨ Features
+
+PawPal+ helps a pet owner plan and organize daily care tasks. The finished app supports:
+
+- **Add pets** — register one or more pets (name, species, and more) under an owner.
+- **Add tasks** — create care tasks with a title, category, priority, duration, and due time.
+- **Generate schedules** — build a daily plan that picks tasks by priority within a time budget.
+- **Sort by time** — display tasks and schedules in chronological order (`sort_by_time`).
+- **Filter tasks** — view tasks for a specific pet or by completion status (`filter_tasks`).
+- **Recurring tasks** — completing a daily or weekly task automatically creates the next one (`complete_task`).
+- **Conflict warnings** — flag tasks scheduled for the exact same time (`detect_conflicts`).
+
 ## What you will build
 
 Your final app should:
@@ -44,17 +56,15 @@ pip install -r requirements.txt
 
 ## 🖥️ Sample Output
 
-Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
+Run the command-line demo to see the scheduler in action:
 
-Today's Schedule for Jordan - Saturday, July 04, 2026
-(time budget: 90 min)
---------------------------------------------------------------------
-Time    Pet      Task             Priority  Mins  Status
---------------------------------------------------------------------
-08:00   Mochi    Morning walk     high      30    Pending
-09:00   Luna     Litter box       high      10    Pending
-14:00   Mochi    Vet checkup      medium    45    Pending
---------------------------------------------------------------------
+```bash
+python main.py
+```
+
+It prints the same tasks unsorted, then sorted by time, then filtered, and
+finally lists any scheduling conflicts (see the full output in
+[Demo Walkthrough](#-demo-walkthrough) below).
 
 ## 🧪 Testing PawPal+
 
@@ -106,14 +116,73 @@ live on the `PawPalSystem` class and take a plain list of `Task` objects.
   warning lists the clashing task titles and their pet names. It returns an empty
   list when there are no conflicts (it never raises an error).
 
-## 📸 Demo Walkthrough
+## 🎬 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+### Main UI features
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+Launch the Streamlit app with `streamlit run app.py`. From the UI you can:
+
+- Enter an **owner** name and add one or more **pets** (name + species).
+- Add **tasks** to a chosen pet with a title, category, priority, duration, due time, and completion status.
+- See each pet's tasks in a table, **sorted by time**, showing pet, title, priority, duration, due time, and status.
+- Choose a day and a **time budget**, then generate today's **schedule**.
+- Read **conflict warnings** when two tasks share the same time.
+
+### Example workflow
+
+1. **Add a pet** — type a name (e.g. `Mochi`), pick a species, and click **Add pet**.
+2. **Add a task** — select the pet, fill in the task details (e.g. `Morning walk`, high priority, 30 min, due 08:00), and click **Add task**.
+3. **View today's schedule** — set the time budget (e.g. 90 minutes) and click **Generate schedule** to see the ordered plan for the day.
+
+### Key scheduler behaviors
+
+- **Sorted tasks** — both the task table and the generated schedule are shown earliest-first using `sort_by_time()`.
+- **Conflict warnings** — if two tasks are booked for the exact same time, the app shows an `st.warning`; otherwise it confirms there are no conflicts.
+- **Recurring tasks** — completing a daily or weekly task creates the next occurrence automatically via `complete_task()`.
+
+### Sample CLI output
+
+Running `python main.py` demonstrates the same logic in the terminal:
+
+```
+PawPal+ Demo for Jordan - Sunday, July 05, 2026
+
+Unsorted tasks (as added)
+------------------------------------------------------------
+Time    Pet      Task             Priority  Status
+------------------------------------------------------------
+14:00   Mochi    Vet checkup      medium    Done
+08:00   Mochi    Morning walk     high      Pending
+12:00   Luna     Feed lunch       low       Pending
+08:00   Luna     Litter box       high      Pending
+
+Sorted by time
+------------------------------------------------------------
+Time    Pet      Task             Priority  Status
+------------------------------------------------------------
+08:00   Mochi    Morning walk     high      Pending
+08:00   Luna     Litter box       high      Pending
+12:00   Luna     Feed lunch       low       Pending
+14:00   Mochi    Vet checkup      medium    Done
+
+Filtered: incomplete tasks only
+------------------------------------------------------------
+Time    Pet      Task             Priority  Status
+------------------------------------------------------------
+08:00   Mochi    Morning walk     high      Pending
+08:00   Luna     Litter box       high      Pending
+12:00   Luna     Feed lunch       low       Pending
+
+Filtered: Luna's tasks only
+------------------------------------------------------------
+Time    Pet      Task             Priority  Status
+------------------------------------------------------------
+08:00   Luna     Litter box       high      Pending
+12:00   Luna     Feed lunch       low       Pending
+
+Conflict Warnings
+------------------------------------------------------------
+! Conflict at 2026-07-05 08:00: 'Morning walk' (Mochi), 'Litter box' (Luna)
+```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

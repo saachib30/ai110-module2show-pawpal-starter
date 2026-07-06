@@ -117,10 +117,12 @@ else:
         selected_pet.add_task(new_task)
         st.success(f"Added '{new_task.title}' for {selected_pet.name}.")
 
-    # Show the tasks for the currently selected pet.
+    # Show the tasks for the currently selected pet, sorted chronologically.
     selected_pet = next(p for p in pets if p.name == pet_choice)
+    sorted_tasks = system.sort_by_time(selected_pet.get_tasks())
     task_rows = [
         {
+            "pet": selected_pet.name,
             "title": t.title,
             "category": t.category,
             "priority": t.priority,
@@ -128,7 +130,7 @@ else:
             "due": t.due_date.strftime("%H:%M") if t.due_date else "-",
             "done": t.is_complete,
         }
-        for t in selected_pet.get_tasks()
+        for t in sorted_tasks
     ]
     if task_rows:
         st.write(f"Current tasks for {selected_pet.name}:")
@@ -157,6 +159,8 @@ if st.button("Generate schedule"):
         st.info("No tasks fit this day's schedule. Add tasks for that day or increase the time budget.")
     else:
         st.write("### Schedule")
+        # Display the planned tasks in chronological order.
+        ordered_schedule = system.sort_by_time(schedule)
         schedule_rows = [
             {
                 "when": t.due_date.strftime("%Y-%m-%d %H:%M") if t.due_date else "-",
@@ -166,6 +170,14 @@ if st.button("Generate schedule"):
                 "duration_minutes": t.duration_minutes,
                 "status": "Done" if t.is_complete else "Pending",
             }
-            for t in schedule
+            for t in ordered_schedule
         ]
         st.table(schedule_rows)
+
+        # Warn about any tasks scheduled for the exact same time.
+        conflicts = system.detect_conflicts(ordered_schedule)
+        if conflicts:
+            for warning in conflicts:
+                st.warning(warning)
+        else:
+            st.success("No scheduling conflicts found.")
