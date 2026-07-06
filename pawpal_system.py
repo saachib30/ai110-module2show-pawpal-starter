@@ -7,7 +7,7 @@ Owner, and the PawPalSystem coordinator/scheduler.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 # Higher number = more important. Used to order the daily schedule.
 PRIORITY_ORDER = {"high": 3, "medium": 2, "low": 1}
@@ -26,6 +26,7 @@ class Task:
     due_date: datetime | None = None
     is_complete: bool = False
     is_recurring: bool = False
+    frequency: str = "none"  # "none" | "daily" | "weekly"
     # Back-reference to the owning Pet; set by Pet.add_task(). Excluded from
     # repr/eq to avoid recursive representation and identity coupling.
     pet: Pet | None = field(default=None, repr=False, compare=False)
@@ -136,6 +137,82 @@ class PawPalSystem:
     def get_all_pets(self) -> list[Pet]:
         """Return every pet across all owners."""
         return [pet for owner in self.owners for pet in owner.pets]
+
+    def sort_by_time(self, tasks: list[Task]) -> list[Task]:
+        """Return tasks sorted by due_date (undated tasks go last)."""
+        return sorted(
+            tasks, key=lambda t: (t.due_date is None, t.due_date or datetime.max)
+        )
+
+    def filter_tasks(
+        self,
+        tasks: list[Task],
+        pet_name: str | None = None,
+        completed: bool | None = None,
+    ) -> list[Task]:
+        """Return tasks matching the given pet name and/or completion status."""
+        result = []
+        for task in tasks:
+            if pet_name is not None and (task.pet is None or task.pet.name != pet_name):
+                continue
+            if completed is not None and task.is_complete != completed:
+                continue
+            result.append(task)
+        return result
+
+    def detect_conflicts(self, tasks: list[Task]) -> list[str]:
+        """Return warnings for tasks that share the exact same due date/time."""
+        # Group tasks by their due_date (skip tasks that have no date).
+        by_time: dict[datetime, list[Task]] = {}
+        for task in tasks:
+            if task.due_date is not None:
+                by_time.setdefault(task.due_date, []).append(task)
+
+        warnings = []
+        for due_date, clashing in by_time.items():
+            if len(clashing) > 1:
+                labels = [
+                    f"'{t.title}' ({t.pet.name if t.pet else 'no pet'})"
+                    for t in clashing
+                ]
+                warnings.append(
+                    f"Conflict at {due_date:%Y-%m-%d %H:%M}: " + ", ".join(labels)
+                )
+        return warnings
+
+    def complete_task(self, task: Task) -> Task | None:
+        """Mark a task complete and, if recurring, create its next occurrence."""
+        task.mark_complete()
+
+        # Only recurring tasks with a known due date can roll forward.
+        if not task.is_recurring or task.due_date is None:
+            return None
+
+        if task.frequency == "daily":
+            next_date = task.due_date + timedelta(days=1)
+        elif task.frequency == "weekly":
+            next_date = task.due_date + timedelta(days=7)
+        else:
+            return None
+
+        # Copy the task's details, but reset completion and use the new date.
+        next_task = Task(
+            task_id=task.task_id,
+            title=task.title,
+            description=task.description,
+            category=task.category,
+            priority=task.priority,
+            duration_minutes=task.duration_minutes,
+            due_date=next_date,
+            is_complete=False,
+            is_recurring=True,
+            frequency=task.frequency,
+        )
+
+        # Attach the new task back to the same pet, if there is one.
+        if task.pet is not None:
+            task.pet.add_task(next_task)
+        return next_task
 
     def send_reminder(self, task: Task) -> str:
         """Build a reminder message for the owner of the task's pet."""

@@ -31,6 +31,7 @@ I also updated the `Task` class to include `priority` and `duration_minutes` bec
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
+Ans: One tradeoff my scheduler makes is in how it detects conflicts. Right now `detect_conflicts()` only checks for tasks that have the exact same `due_date`/time. It does not use each task's duration to figure out if two tasks actually overlap, so a 30-minute walk at 8:00 and a feeding at 8:15 would not be flagged as a conflict even though they clash in real life. I decided to keep it this way because exact-time matching is simple to write and easy to read, and it still catches the most obvious problem of booking two tasks at the same start time. The downside is that it can miss overlapping tasks, so if I had more time I would extend it to compare start and end times using `duration_minutes`.
 
 ---
 

@@ -74,14 +74,22 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
+Phase 4 adds an algorithmic layer on top of the core classes. All four methods
+live on the `PawPalSystem` class and take a plain list of `Task` objects.
 
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+- **Sorting — `sort_by_time(tasks)`**: Returns the tasks ordered by `due_date`,
+  earliest first. Tasks with no due date are placed at the end.
+- **Filtering — `filter_tasks(tasks, pet_name=None, completed=None)`**: Returns
+  only the tasks that match the filters you pass. You can filter by pet name, by
+  completion status, or both at once. Leaving a filter as `None` skips it.
+- **Recurring tasks — `complete_task(task)`**: Marks a task complete (using the
+  simple `mark_complete()` method). If the task is recurring, it also creates the
+  next occurrence — moving the date forward by 1 day for `"daily"` or 7 days for
+  `"weekly"` — and adds that new task back to the same pet.
+- **Conflict detection — `detect_conflicts(tasks)`**: Returns a list of warning
+  strings when two or more tasks share the exact same `due_date`/time. Each
+  warning lists the clashing task titles and their pet names. It returns an empty
+  list when there are no conflicts (it never raises an error).
 
 ## 📸 Demo Walkthrough
 
