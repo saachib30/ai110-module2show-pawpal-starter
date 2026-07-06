@@ -6,11 +6,17 @@
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
+Ans: My initial UML design for PawPal+ included four main classes: `Owner`, `Pet`, `Task`, and `PawPalSystem`. The `Owner` class represents the user and stores the pets they care for. The `Pet` class stores details about each pet, such as name, species, breed, age, weight, and its list of care tasks. The `Task` class represents a pet care activity, such as feeding, walking, grooming, or a vet visit. The `PawPalSystem` class acts as the main coordinator for the app by managing owners, finding pets, sending reminders, and generating a daily schedule.
+
+The main relationships in my design are that one `Owner` can have many `Pet` objects, and one `Pet` can have many `Task` objects. The three core user actions are adding pets, creating pet care tasks, and generating or viewing a daily schedule of tasks.
 
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+Ans: Yes, my design changed after reviewing the first skeleton. The original design only had one-way relationships from `PawPalSystem` to `Owner`, from `Owner` to `Pet`, and from `Pet` to `Task`. I updated the design to include back-references so that a `Task` can reference its `Pet`, and a `Pet` can reference its `Owner`. This makes features like `send_reminder(task)` easier because the system can quickly find the correct owner through `task.pet.owner` instead of scanning through every owner, pet, and task.
+
+I also updated the `Task` class to include `priority` and `duration_minutes` because the app needs those fields to generate a useful schedule. Without them, `generate_schedule()` would not know which tasks are most important or how long each task takes. Finally, I changed `generate_schedule()` to accept an `owner`, a `day`, and `available_minutes` so it can create a daily plan within a time budget.
 
 ---
 
