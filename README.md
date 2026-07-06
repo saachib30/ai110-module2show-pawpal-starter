@@ -58,19 +58,34 @@ Time    Pet      Task             Priority  Mins  Status
 
 ## 🧪 Testing PawPal+
 
-```bash
-# Run the full test suite:
-pytest
+Run the automated tests with:
 
-# Run with coverage:
-pytest --cov
+```bash
+python -m pytest
 ```
+
+The tests cover the core backend behaviors:
+
+- **Task completion** — a task becomes complete after `mark_complete()`.
+- **Task addition** — adding a task to a pet updates its list and back-reference.
+- **Sorting correctness** — `sort_by_time()` returns tasks in chronological order.
+- **Recurring task creation** — completing a daily task creates the next day's task.
+- **Conflict detection** — two tasks at the same time produce a warning.
 
 Sample test output:
 
 ```
-# Paste your pytest output here
+============================= test session starts =============================
+platform win32 -- Python 3.9.2, pytest-8.4.2, pluggy-1.6.0
+rootdir: C:\Users\ssbhi\Desktop\ai110-module2show-pawpal-starter
+collected 5 items
+
+tests\test_pawpal.py .....                                               [100%]
+
+============================== 5 passed in 0.03s ==============================
 ```
+
+**Confidence: ★★★★☆ (4 / 5)** — The main backend behaviors are tested and passing, but more UI-level tests for the Streamlit app could be added later.
 
 ## 📐 Smarter Scheduling
 
